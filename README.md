@@ -84,3 +84,5 @@ Use examples liberally, and show the expected output if you can. It's helpful to
 
 ## Project status
 In progress.
+
+## Technologies used 
