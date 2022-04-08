@@ -53,4 +53,4 @@ release:
     - docker push "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG"
   only:
     - tags
-    - ^(0|[1-9]\d).(0|[1-9]\d).(0|[1-9]\d*)
+    - /^(0|[1-9]\d).(0|[1-9]\d).(0|[1-9]\d*)/
