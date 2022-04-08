@@ -43,3 +43,20 @@ Encourage members to ask questions for further clarifications
 
 - Conflicts regarding implementation such as architecture, design, coding approach, etc. are solved via voting. This comes in handy as the team consists of an uneven number of people. Note that, before the voting conflicting parties have the opportunity to share their views on the topic
 - Conflicts regarding individuals are dealt with AS A TEAM. All members work on solving the problem during meetings as soon and as peacefully as possible. Only if the issue is quite severe or a solution consensus is not reached should the conflict be brought up to course responsible(s)
+
+## How will we prevent conflicts?
+
+- We understand that conflicts are inevitable throughout the development process. As a group, we have discussed that conflicts are not always bad, they can be in fact very good because we learn to understand each other as a team. Therefore, in order to treat conflicts in a healthy manner:
+
+- We have weekly standups where we reserve time to raise conflicts and concerns of a personal or work nature.
+    - During this time, we mutually discuss as a team how to resolve these conflicts and concerns. 
+        - Given a situation where there seems to be an unclear consensus, a vote will be held amongst the whole team. 
+
+- Listed in this document below are our signatures. What this means is that we all agree to abide by this code of conduct and that if a conflict arises, we trust from these signatures that we can all act like mature adults and discuss conflicts as they arise throughout the development stages of this project.
+
+## SIGNATURES:
+E-R-D-E-M (Erdem Halil)
+vLaD (Vlad Liteanu)
+GrEggg (Gregory Sastrawidjaya)
+Anis (Enis Bourbia)
+xXTaofikXx (Taofik Arnouk)
