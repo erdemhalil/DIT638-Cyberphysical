@@ -92,6 +92,28 @@ int32_t main(int32_t argc, char **argv) {
                 // Convert the time to microseconds 
                 std::string timestamp = std::to_string(cluon::time::toMicroseconds(imageTime.second));
 
+                // Create an array of points
+                cv::Point corners[1][6];
+                // The inside of the shape contains the important data
+                corners[0][0] = cv::Point( 0, 250);
+                corners[0][1] = cv::Point( 640, 250 );
+                corners[0][2] = cv::Point( 640, 420 );
+                corners[0][3] = cv::Point( 430, 370 );
+                corners[0][4] = cv::Point( 220, 370 );
+                corners[0][5] = cv::Point( 0, 420 );
+                const cv::Point* corner_list[1] = { corners[0] };
+                int num_points = 6;
+
+                // Create a new empty image
+                cv::Mat mask(480,640,CV_8UC4, cv::Scalar(0,0,0));
+                // Add the shape to the image 
+                cv::fillPoly( mask, corner_list, &num_points, 1, cv::Scalar( 255, 255, 255 ), 8);
+
+                // Combune the two images whilest only keeping the data inside the shape
+                cv::bitwise_and(img, mask, img);
+                // Crop some of the dead space
+                img = img(cv::Rect(0,250,640,170));
+
                 // Unlock the shared memory
                 sharedMemory->unlock();
 
