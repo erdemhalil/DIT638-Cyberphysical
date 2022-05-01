@@ -27,6 +27,37 @@
 #include <string>
 #include <sstream>
 
+// High and low global variable values for blue and yellow colors
+cv::Scalar blueLow = cv::Scalar(110, 70, 30);
+cv::Scalar blueHigh = cv::Scalar(130, 255, 255);
+cv::Scalar yellowLow = cv::Scalar(10, 20, 20);
+cv::Scalar yellowHigh = cv::Scalar(45, 255, 255);
+
+void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high)
+{
+    // Create a mask from the hvs image that only contains the colors in the specified range
+    cv::Mat mask;
+    cv::inRange(hsvImg, low, high, mask);
+
+    // Initiate a variable to store the outlines of the cones
+    std::vector<std::vector<cv::Point>> contours;
+    // Find the outlines of cones from the mask and assign them to the contours variable
+    cv::findContours(mask, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    // Go through all the contours
+    for (size_t i = 0; i < contours.size(); ++i)
+    {
+        // Get a rectangle from the current outline
+        cv::Rect boundRect = cv::boundingRect(contours[i]);
+        // Check that the rectangle isn't too big or too small to eliminate noise
+        if ((boundRect.area() > 200 && (boundRect.width < 60 || boundRect.height < 60)) && boundRect.area() < 1500)
+        {
+            // Draw the rectangle on the source image
+            // boundRect.tl() is the top left of the rectangle; boundRect.br() is the bottom right corner
+            cv::rectangle(img, boundRect.tl(), boundRect.br(), cvScalar(0, 255, 0), 3);
+        }
+    }
+}
+
 int32_t main(int32_t argc, char **argv) {
     int32_t retCode{1};
     // Parse the command line parameters as we require the user to specify some mandatory information on startup.
@@ -118,12 +149,25 @@ int32_t main(int32_t argc, char **argv) {
                 sharedMemory->unlock();
 
                 // TODO: Do something with the frame.
+                // Create a new mat image
+                cv::Mat hsvImg;
+                // Copy the original image to the new one
+                img.copyTo(hsvImg);
+                // Convert the new image to the hsv color space
+                cv::cvtColor(hsvImg, hsvImg, cv::COLOR_BGR2HSV);
+
+                // Call the getCones function for blue
+                getCones(hsvImg, img, blueLow, blueHigh);
+                // Call the getCones function for yellow
+                getCones(hsvImg, img, yellowLow, yellowHigh);
+
+
                 // Get and format the time.
                 std::time_t now = std::time(NULL);
                 std::tm * ptm = std::localtime(&now);
                 char buffer[22];
                 // Format: UTC
-                std::strftime(buffer, 22, "%FT%TZ", ptm);  
+                std::strftime(buffer, 22, "%FT%TZ", ptm);
 
                 // Overlay my name on the images
                 cv::putText(img, "Name", cv::Point(50, 50), CV_FONT_HERSHEY_TRIPLEX,  0.7, cvScalar(0,0,255), 1, CV_AA);
