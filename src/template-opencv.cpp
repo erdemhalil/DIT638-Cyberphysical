@@ -26,6 +26,14 @@
 #include <ctime> 
 #include <string>
 #include <sstream>
+#include "Cone.h"
+
+// Create one vector for each color
+std::vector<Cone> blueCones;
+std::vector<Cone> yellowCones;
+// Initiate variables for colors 
+char blue = 'B';
+char yellow = 'Y';
 
 // High and low global variable values for blue and yellow colors
 cv::Scalar blueLow = cv::Scalar(110, 70, 30);
@@ -33,7 +41,7 @@ cv::Scalar blueHigh = cv::Scalar(130, 255, 255);
 cv::Scalar yellowLow = cv::Scalar(10, 20, 20);
 cv::Scalar yellowHigh = cv::Scalar(45, 255, 255);
 
-void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high)
+void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char color)
 {
     // Create a mask from the hvs image that only contains the colors in the specified range
     cv::Mat mask;
@@ -51,6 +59,18 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high)
         // Check that the rectangle isn't too big or too small to eliminate noise
         if ((boundRect.area() > 200 && (boundRect.width < 60 || boundRect.height < 60)) && boundRect.area() < 1500)
         {
+            // Check if the color is blue
+            if (color == blue)
+            {
+                // Add the cone position and rectangle to the blue vector
+                blueCones.emplace_back(boundRect, ((boundRect.x + boundRect.width) / 2), ((boundRect.y + boundRect.height) / 2));
+            }
+            // Check if the color is yellow
+            if (color == yellow)
+            {
+                // Add the cone position and rectangle to the yellow vector
+                yellowCones.emplace_back(boundRect, ((boundRect.x + boundRect.width) / 2), ((boundRect.y + boundRect.height) / 2));
+            }
             // Draw the rectangle on the source image
             // boundRect.tl() is the top left of the rectangle; boundRect.br() is the bottom right corner
             cv::rectangle(img, boundRect.tl(), boundRect.br(), cvScalar(0, 255, 0), 3);
@@ -156,11 +176,22 @@ int32_t main(int32_t argc, char **argv) {
                 // Convert the new image to the hsv color space
                 cv::cvtColor(hsvImg, hsvImg, cv::COLOR_BGR2HSV);
 
+                // Empty the blue vector every frame
+                blueCones.clear();
                 // Call the getCones function for blue
-                getCones(hsvImg, img, blueLow, blueHigh);
+                getCones(hsvImg, img, blueLow, blueHigh, blue);
+                // Empry the yellow vector every frame 
+                yellowCones.clear();
                 // Call the getCones function for yellow
-                getCones(hsvImg, img, yellowLow, yellowHigh);
+                getCones(hsvImg, img, yellowLow, yellowHigh, yellow);
 
+                // Go through each object in the vectors and print the cone position
+                for (size_t i = 0; i < blueCones.size(); i++){
+                    std::cout << "blue cones = " << blueCones[i].position << std::endl;
+                }
+                for (size_t i = 0; i < yellowCones.size(); i++){
+                    std::cout << "yellow cones = " << yellowCones[i].position << std::endl;
+                }
 
                 // Get and format the time.
                 std::time_t now = std::time(NULL);
