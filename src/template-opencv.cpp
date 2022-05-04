@@ -63,13 +63,13 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
             if (color == blue)
             {
                 // Add the cone position and rectangle to the blue vector
-                blueCones.emplace_back(boundRect, ((boundRect.x + boundRect.width) / 2), ((boundRect.y + boundRect.height) / 2));
+                blueCones.emplace_back(boundRect, (boundRect.x + boundRect.width / 2), (boundRect.y + boundRect.height / 2));
             }
             // Check if the color is yellow
             if (color == yellow)
             {
                 // Add the cone position and rectangle to the yellow vector
-                yellowCones.emplace_back(boundRect, ((boundRect.x + boundRect.width) / 2), ((boundRect.y + boundRect.height) / 2));
+                yellowCones.emplace_back(boundRect, (boundRect.x + boundRect.width / 2), (boundRect.y + boundRect.height / 2));
             }
             // Draw the rectangle on the source image
             // boundRect.tl() is the top left of the rectangle; boundRect.br() is the bottom right corner
