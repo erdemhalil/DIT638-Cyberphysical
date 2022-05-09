@@ -26,11 +26,10 @@
 #include <ctime> 
 #include <string>
 #include <sstream>
-#include "Cone.h"
 
-// Create one vector for each color
-std::vector<Cone> blueCones;
-std::vector<Cone> yellowCones;
+// Create one vector of points for each color
+std::vector<cv::Point> blueCones;
+std::vector<cv::Point> yellowCones;
 // Initiate variables for colors 
 char blue = 'B';
 char yellow = 'Y';
@@ -63,13 +62,13 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
             if (color == blue)
             {
                 // Add the cone position and rectangle to the blue vector
-                blueCones.emplace_back(boundRect, (boundRect.x + boundRect.width / 2), (boundRect.y + boundRect.height / 2));
+                blueCones.emplace_back((boundRect.x + boundRect.width / 2), (boundRect.y + boundRect.height / 2));
             }
             // Check if the color is yellow
             if (color == yellow)
             {
                 // Add the cone position and rectangle to the yellow vector
-                yellowCones.emplace_back(boundRect, (boundRect.x + boundRect.width / 2), (boundRect.y + boundRect.height / 2));
+                yellowCones.emplace_back((boundRect.x + boundRect.width / 2), (boundRect.y + boundRect.height / 2));
             }
             // Draw the rectangle on the source image
             // boundRect.tl() is the top left of the rectangle; boundRect.br() is the bottom right corner
@@ -169,6 +168,8 @@ int32_t main(int32_t argc, char **argv) {
                 sharedMemory->unlock();
 
                 // TODO: Do something with the frame.
+                // Blue the image to reduce noise 
+                cv::GaussianBlur(img, img, cv::Size(7, 7), 1.0);
                 // Create a new mat image
                 cv::Mat hsvImg;
                 // Copy the original image to the new one
@@ -178,20 +179,21 @@ int32_t main(int32_t argc, char **argv) {
 
                 // Empty the blue vector every frame
                 blueCones.clear();
+                // Add a initial point (to be deleted later)
+                blueCones.emplace_back(0, 170);
                 // Call the getCones function for blue
                 getCones(hsvImg, img, blueLow, blueHigh, blue);
                 // Empry the yellow vector every frame 
                 yellowCones.clear();
+                // Add a initial point (to be deleted later)
+                yellowCones.emplace_back(640, 170);
                 // Call the getCones function for yellow
                 getCones(hsvImg, img, yellowLow, yellowHigh, yellow);
 
-                // Go through each object in the vectors and print the cone position
-                for (size_t i = 0; i < blueCones.size(); i++){
-                    std::cout << "blue cones = " << blueCones[i].position << std::endl;
-                }
-                for (size_t i = 0; i < yellowCones.size(); i++){
-                    std::cout << "yellow cones = " << yellowCones[i].position << std::endl;
-                }
+                // Draw the lanes from the blue cones 
+                cv::polylines(img, blueCones, 0, cvScalar(0,0,255), 3, 8, 0);
+                // Draw the lanes from the yellow cones 
+                cv::polylines(img, yellowCones, 0, cvScalar(0,0,255), 3, 8, 0);
 
                 // Get and format the time.
                 std::time_t now = std::time(NULL);
