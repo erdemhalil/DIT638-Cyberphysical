@@ -36,10 +36,10 @@ char blue = 'B';
 char yellow = 'Y';
 
 // High and low global variable values for blue and yellow colors
-cv::Scalar blueLow = cv::Scalar(110, 70, 30);
-cv::Scalar blueHigh = cv::Scalar(130, 255, 255);
-cv::Scalar yellowLow = cv::Scalar(10, 20, 20);
-cv::Scalar yellowHigh = cv::Scalar(45, 255, 255);
+cv::Scalar blueLow = cv::Scalar(120, 50, 30);
+cv::Scalar blueHigh = cv::Scalar(125, 255, 225);
+cv::Scalar yellowLow = cv::Scalar(15, 20, 30);
+cv::Scalar yellowHigh = cv::Scalar(42, 255, 255);
 
 void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char color)
 {
