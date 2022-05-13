@@ -58,7 +58,6 @@ release:
     - DOCKER_CLI_EXPERIMENTAL=enabled docker buildx create --name platformbuilder --use
     - DOCKER_CLI_EXPERIMENTAL=enabled docker buildx inspect --bootstrap
     - docker buildx build --push --platform "linux/amd64,linux/arm/v7" -t "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG" .
-    - docker push "$CI_REGISTRY_IMAGE":"$CI_COMMIT_TAG"
   only:
     - tags
     - /^(0|[1-9]\d).(0|[1-9]\d).(0|[1-9]\d*)/
