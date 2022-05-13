@@ -39,7 +39,7 @@ build-and-test:
     - docker-build
   stage: build
   script:
-    - docker build -f Dockerfile .
+    - docker buildx build --platform "linux/amd64,linux/arm/v7" -f Dockerfile .
   except:
     - tags
 
