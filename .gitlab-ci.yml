@@ -51,7 +51,7 @@ release:
   before_script:
     - mkdir -p ~/.docker/cli-plugins/
     - wget -O ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-amd64
-    - chmod 755 /.docker/cli-plugins/docker-buildx
+    - chmod 755 ~/.docker/cli-plugins/docker-buildx
     - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - docker login -u gitlab-ci-token -p ${CI_JOB_TOKEN} ${CI_REGISTRY}
   script:
