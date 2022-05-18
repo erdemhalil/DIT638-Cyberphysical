@@ -42,6 +42,8 @@ bool bLeft = false;
 bool yLeft = false;
 bool fBlue = false;
 bool fYellow = false;
+
+bool isMirrored = true;
 // Variable for storing the direction of the car
 double steeringWheelAngle = 0.0;
 // Constant storing the number that is used to calculate the steering wheel angle
@@ -218,10 +220,11 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
             fBlue = true;
             lastBlueCone = blueCones;
             // Check if the blue cone is on the left or right side of the image
-            if (blueCones.x < car.x)
+            if (blueCones.x < car.x && isMirrored == true)
             {
                 bLeft = true;
                 yLeft = false;
+                isMirrored = false;
             }
         }
     }
@@ -257,10 +260,11 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
             fYellow = true;
             lastYellowCone = yellowCones;
             // Check if the yellow cone is on the left or right side of the image
-            if (yellowCones.x < car.x)
+            if (yellowCones.x < car.x && isMirrored == true)
             {
                 bLeft = false;
                 yLeft = true;
+                isMirrored = false;
             }
         }
     }
