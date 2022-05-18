@@ -146,7 +146,7 @@ int32_t main(int32_t argc, char **argv)
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 std::lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                std::cout << "groundSteering = " << gsr.groundSteering() << std::endl;
+                // std::cout << "groundSteering = " << gsr.groundSteering() << std::endl;
             };
 
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
