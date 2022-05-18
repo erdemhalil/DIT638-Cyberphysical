@@ -150,7 +150,7 @@ int32_t main(int32_t argc, char **argv)
                 // Reset the cone variables every frame
                 isBlue = false;
                 isYellow = false;
-
+                isMirrored = true;
                 // Call the getCones function for blue
                 getCones(hsvImg, img, blueLow, blueHigh, blue);
                 // Call the getCones function for yellow
@@ -390,7 +390,7 @@ void calculate(char direction, double difference)
         negative = 1;
     }
     // based if the differance, create a value that is between -0.29 and 0.29
-    steeringWheelAngle = magicNumber * (1 + difference) * negative;
+    steeringWheelAngle = 0.1 * (1 + difference) * negative;
     // check if the steering wheel angle is more then 0.29
     if (steeringWheelAngle > magicNumber)
     {
