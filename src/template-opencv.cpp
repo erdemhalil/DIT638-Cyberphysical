@@ -46,7 +46,43 @@ bool isMirrored = true;
 // Variable for storing the direction of the car
 double steeringWheelAngle = 0.0;
 // Constant storing the number that is used to calculate the steering wheel angle
-const double magicNumber = 0.145440;
+const double magicNumber = 0.145540;
+// Range for the angle calculation
+const double threshold = 0.08;
+const double threshold2 = 0.9;
+// Variable to keep count of the corect frames
+double variable = 0;
+
+// Function to calculate the number of frames that meet the performance requirement
+void calculatePerformance(double groundSteering)
+{
+    // If original steering angle is 0, check if we are in range +/- 0.05
+    if (groundSteering == 0)
+    {
+        if (steeringWheelAngle < 0.05 && steeringWheelAngle > -0.05)
+        {
+            variable++;
+        }
+    }
+    // If original steering angle is greater than 0, check if we are within 50%
+    else if (groundSteering > 0)
+    {
+        if (groundSteering * 0.5 < steeringWheelAngle && steeringWheelAngle < groundSteering * 1.5)
+        {
+            variable++;
+        }
+    }
+    // If original steering angle is less than 0, check if we are within 50%
+    else
+    {
+        if (groundSteering * 0.5 > steeringWheelAngle && steeringWheelAngle > groundSteering * 1.5)
+        {
+            variable++;
+        }
+    }
+    // Print the result
+    std::cout << variable << std::endl;
+}
 
 // High and low global variable values for blue and yellow colors
 cv::Scalar blueLow = cv::Scalar(100, 50, 30);
@@ -110,7 +146,7 @@ int32_t main(int32_t argc, char **argv)
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 std::lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                // std::cout << "groundSteering = " << gsr.groundSteering() << std::endl;
+                std::cout << "groundSteering = " << gsr.groundSteering() << std::endl;
             };
 
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
@@ -157,6 +193,10 @@ int32_t main(int32_t argc, char **argv)
                 getCones(hsvImg, img, yellowLow, yellowHigh, yellow);
                 // Call the getDistance function
                 getDistance();
+
+                // Funciton to be used for measuring the preformance
+                // double groundSteering = gsr.groundSteering();
+                // calculatePerformance(groundSteering);
 
                 // If you want to access the latest received ground steering, don't forget to lock the mutex:
                 {
@@ -221,7 +261,7 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
             // Check if the blue cone is on the left or right side of the image
         }
         if (blueCones.x < car.x && isMirrored)
-        {   
+        {
             bLeft = true;
             yLeft = false;
             isMirrored = false;
@@ -289,15 +329,23 @@ void getDistance()
             {
                 // Set the differance to the difference between the car and the blue cone
                 difference = static_cast<double>(blueCones.x) / static_cast<double>(car.x);
-                // Check if the current blue cone is the same as the last blue cone
-                if (blueCones.x > lastBlueCone.x)
+                // Check that the calculation is in the correct range
+                if (abs(difference) < threshold || abs(difference) > threshold2)
                 {
-                    // Call the steer function with the direction and the differance to calculate the steering wheel angle
-                    calculate(right, difference);
+                    steeringWheelAngle = -0.049;
                 }
                 else
                 {
-                    steeringWheelAngle = -0.049;
+                    // Check if the current blue cone is the same as the last blue cone
+                    if (blueCones.x > lastBlueCone.x)
+                    {
+                        // Call the steer function with the direction and the differance to calculate the steering wheel angle
+                        calculate(right, difference || abs(difference) > threshold2);
+                    }
+                    else
+                    {
+                        steeringWheelAngle = -0.049;
+                    }
                 }
             }
             // Check if we have a yellow cone in frame
@@ -305,14 +353,22 @@ void getDistance()
             {
                 // Set the differance to the difference between the car and the yellow cone
                 difference = static_cast<double>(car.x) / static_cast<double>(yellowCones.x);
-                // Check if the current yellow cone is the same as the last yellow cone
-                if (yellowCones.y == lastYellowCone.y)
+                // Check that the calculation is in the correct range
+                if (abs(difference) < threshold || abs(difference) > threshold2)
                 {
                     steeringWheelAngle = 0.049;
                 }
-                else if (yellowCones.y > lastYellowCone.y)
+                else
                 {
-                    calculate(left, difference);
+                    // Check if the current yellow cone is the same as the last yellow cone
+                    if (yellowCones.y == lastYellowCone.y)
+                    {
+                        steeringWheelAngle = 0.049;
+                    }
+                    else if (yellowCones.y > lastYellowCone.y)
+                    {
+                        calculate(left, difference);
+                    }
                 }
             }
             // Set the differance to 0
@@ -326,14 +382,22 @@ void getDistance()
             {
                 // Set the differance to the difference between the car and the yellow cone
                 difference = static_cast<double>(yellowCones.x) / static_cast<double>(car.x);
-                // Check if the current yellow cone is the same as the last yellow cone
-                if (yellowCones.x > lastYellowCone.x)
+                // Check that the calculation is in the correct range
+                if (abs(difference) < threshold || abs(difference) > threshold2)
                 {
-                    calculate(right, difference);
+                    steeringWheelAngle = -0.049;
                 }
                 else
                 {
-                    steeringWheelAngle = -0.049;
+                    // Check if the current yellow cone is the same as the last yellow cone
+                    if (yellowCones.x > lastYellowCone.x)
+                    {
+                        calculate(right, difference);
+                    }
+                    else
+                    {
+                        steeringWheelAngle = -0.049;
+                    }
                 }
             }
             // Check if we have a blue cone in frame
@@ -341,13 +405,21 @@ void getDistance()
             {
                 // Set the differance to the difference between the car and the blue cone
                 difference = static_cast<double>(car.x) / static_cast<double>(blueCones.x);
-                if (blueCones.y == lastBlueCone.y)
+                // Check that the calculation is in the correct range
+                if (abs(difference) < threshold || abs(difference) > threshold2)
                 {
                     steeringWheelAngle = 0.049;
                 }
-                else if (blueCones.y > lastBlueCone.y)
+                else
                 {
-                    calculate(left, difference);
+                    if (blueCones.y == lastBlueCone.y)
+                    {
+                        steeringWheelAngle = 0.049;
+                    }
+                    else if (blueCones.y > lastBlueCone.y)
+                    {
+                        calculate(left, difference);
+                    }
                 }
             }
             // Set the differance to 0
@@ -390,7 +462,7 @@ void calculate(char direction, double difference)
         negative = 1;
     }
     // based if the differance, create a value that is between -0.29 and 0.29
-    steeringWheelAngle = 0.1 * (1 + difference) * negative;
+    steeringWheelAngle = 0.09 * (1 + difference) * negative;
     // check if the steering wheel angle is more then 0.29
     if (steeringWheelAngle > magicNumber)
     {
