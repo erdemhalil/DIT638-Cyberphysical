@@ -42,12 +42,11 @@ bool bLeft = false;
 bool yLeft = false;
 bool fBlue = false;
 bool fYellow = false;
-
 bool isMirrored = true;
 // Variable for storing the direction of the car
 double steeringWheelAngle = 0.0;
 // Constant storing the number that is used to calculate the steering wheel angle
-const double magicNumber = 0.11;
+const double magicNumber = 0.145440;
 
 // High and low global variable values for blue and yellow colors
 cv::Scalar blueLow = cv::Scalar(100, 50, 30);
@@ -111,7 +110,7 @@ int32_t main(int32_t argc, char **argv)
                 // https://github.com/chrberger/libcluon/blob/master/libcluon/testsuites/TestEnvelopeConverter.cpp#L31-L40
                 std::lock_guard<std::mutex> lck(gsrMutex);
                 gsr = cluon::extractMessage<opendlv::proxy::GroundSteeringRequest>(std::move(env));
-                std::cout << "groundSteering = " << gsr.groundSteering() << std::endl;
+                // std::cout << "groundSteering = " << gsr.groundSteering() << std::endl;
             };
 
             od4.dataTrigger(opendlv::proxy::GroundSteeringRequest::ID(), onGroundSteeringRequest);
@@ -220,12 +219,12 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
             fBlue = true;
             lastBlueCone = blueCones;
             // Check if the blue cone is on the left or right side of the image
-            if (blueCones.x < car.x && isMirrored == true)
-            {
-                bLeft = true;
-                yLeft = false;
-                isMirrored = false;
-            }
+        }
+        if (blueCones.x < car.x && isMirrored)
+        {   
+            bLeft = true;
+            yLeft = false;
+            isMirrored = false;
         }
     }
     // Check if the color is yellow
@@ -259,13 +258,13 @@ void getCones(cv::Mat hsvImg, cv::Mat img, cv::Scalar low, cv::Scalar high, char
         {
             fYellow = true;
             lastYellowCone = yellowCones;
-            // Check if the yellow cone is on the left or right side of the image
-            if (yellowCones.x < car.x && isMirrored == true)
-            {
-                bLeft = false;
-                yLeft = true;
-                isMirrored = false;
-            }
+        }
+        // Check if the yellow cone is on the left or right side of the image
+        if (yellowCones.x < car.x && isMirrored)
+        {
+            bLeft = false;
+            yLeft = true;
+            isMirrored = false;
         }
     }
 }
@@ -276,7 +275,7 @@ void getDistance()
     if (isBlue && isYellow)
     {
         // Set the steering wheel angle to 0
-        steeringWheelAngle = 0.0;
+        steeringWheelAngle = 0.049;
     }
     else
     {
@@ -298,7 +297,7 @@ void getDistance()
                 }
                 else
                 {
-                    steeringWheelAngle = 0.0;
+                    steeringWheelAngle = -0.049;
                 }
             }
             // Check if we have a yellow cone in frame
@@ -309,7 +308,7 @@ void getDistance()
                 // Check if the current yellow cone is the same as the last yellow cone
                 if (yellowCones.y == lastYellowCone.y)
                 {
-                    steeringWheelAngle = 0.0;
+                    steeringWheelAngle = 0.049;
                 }
                 else if (yellowCones.y > lastYellowCone.y)
                 {
@@ -334,7 +333,7 @@ void getDistance()
                 }
                 else
                 {
-                    steeringWheelAngle = 0.0;
+                    steeringWheelAngle = -0.049;
                 }
             }
             // Check if we have a blue cone in frame
@@ -344,7 +343,7 @@ void getDistance()
                 difference = static_cast<double>(car.x) / static_cast<double>(blueCones.x);
                 if (blueCones.y == lastBlueCone.y)
                 {
-                    steeringWheelAngle = 0.0;
+                    steeringWheelAngle = 0.049;
                 }
                 else if (blueCones.y > lastBlueCone.y)
                 {
@@ -356,7 +355,7 @@ void getDistance()
         }
         else
         {
-            steeringWheelAngle = 0.0;
+            steeringWheelAngle = 0.049;
         }
     }
     // Set the last blue cone to the current blue cone
@@ -372,10 +371,10 @@ void calculate(char direction, double difference)
     if (direction == right)
     {
         // Check if the steering wheel angle more then 0
-        if (steeringWheelAngle > 0)
+        if (steeringWheelAngle > 0.49)
         {
             // Set the steering wheel angle to 0
-            steeringWheelAngle = 0;
+            steeringWheelAngle = 0.49;
         }
         negative = -1;
     }
@@ -383,24 +382,24 @@ void calculate(char direction, double difference)
     else if (direction == left)
     {
         // Check if the steering wheel angle less then 0
-        if (steeringWheelAngle < 0)
+        if (steeringWheelAngle < -0.49)
         {
             // Set the steering wheel angle to 0
-            steeringWheelAngle = 0;
+            steeringWheelAngle = -0.49;
         }
         negative = 1;
     }
     // based if the differance, create a value that is between -0.29 and 0.29
     steeringWheelAngle = magicNumber * (1 + difference) * negative;
     // check if the steering wheel angle is more then 0.29
-    if (steeringWheelAngle > 0.29)
+    if (steeringWheelAngle > magicNumber)
     {
         // Set the steering wheel angle to 0.29
-        steeringWheelAngle = 0.29;
+        steeringWheelAngle = magicNumber;
     } // check if the steering wheel angle is less then -0.29
-    else if (steeringWheelAngle < -0.29)
+    else if (steeringWheelAngle < -(magicNumber))
     {
         // Set the steering wheel angle to -0.29
-        steeringWheelAngle = -0.29;
+        steeringWheelAngle = -(magicNumber);
     }
 }
